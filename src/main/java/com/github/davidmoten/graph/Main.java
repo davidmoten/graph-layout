@@ -7,6 +7,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.QuadCurve2D;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -29,13 +30,26 @@ public class Main {
         layout.initialize();
         layout.setSize(new Dimension(600, 600));
 
-        displayLayout(layout);
+        AtomicReference<JPanel> panel = showGui(layout);
+
+        printLayout(layout);
         while (!layout.done()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                throw new RuntimeException(e);
+            }
             layout.step();
+            SwingUtilities.invokeLater(() -> panel.get().repaint());
         }
-        displayLayout(layout);
+        printLayout(layout);
         System.out.println(g);
 
+    }
+
+    private static AtomicReference<JPanel> showGui(FRLayout<String, String> layout) {
+        AtomicReference<JPanel> ref = new AtomicReference<JPanel>();
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame();
             frame.setSize(layout.getSize());
@@ -43,8 +57,10 @@ public class Main {
             frame.setTitle("State Diagram");
             frame.setVisible(true);
             JPanel panel = new MyPanel(layout);
+            ref.set(panel);
             frame.getContentPane().add(panel);
         });
+        return ref;
 
     }
 
@@ -59,9 +75,10 @@ public class Main {
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        protected void paintComponent(Graphics gOld) {
+            Graphics2D g = (Graphics2D) gOld;
+            super.paintComponent(g);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             for (String edge : layout.getGraph().getEdges()) {
                 Pair<String> edges = layout.getGraph().getEndpoints(edge);
                 Point d1 = getVertexLocation(layout, edges.getFirst());
@@ -93,19 +110,19 @@ public class Main {
                 double controlY = (d1.y + d2.y) / 2 + sign * dy;
                 QuadCurve2D.Double q = new QuadCurve2D.Double(d1.x, d1.y, controlX, controlY, d2.x,
                         d2.y);
-                g2.draw(q);
+                g.draw(q);
                 // g2.drawLine(d1.x, d1.y, d2.x, d2.y);
             }
             for (String vertex : layout.getGraph().getVertices()) {
                 Point d = getVertexLocation(layout, vertex);
-                int w = g2.getFontMetrics().stringWidth(vertex);
+                int w = g.getFontMetrics().stringWidth(vertex);
                 int margin = 20;
                 Rectangle box = new Rectangle(d.x - w / 2 - margin,
-                        d.y - g2.getFontMetrics().getAscent() - margin, w + 2 * margin,
-                        g2.getFontMetrics().getHeight() + 2 * margin);
-                g2.clearRect(box.x, box.y, box.width, box.height);
-                g2.drawRect(box.x, box.y, box.width, box.height);
-                g2.drawString(vertex, d.x - w / 2, d.y);
+                        d.y - g.getFontMetrics().getAscent() - margin, w + 2 * margin,
+                        g.getFontMetrics().getHeight() + 2 * margin);
+                g.clearRect(box.x, box.y, box.width, box.height);
+                g.drawRect(box.x, box.y, box.width, box.height);
+                g.drawString(vertex, d.x - w / 2, d.y);
             }
         }
 
@@ -136,7 +153,7 @@ public class Main {
         return g;
     }
 
-    private static void displayLayout(FRLayout<String, String> layout) {
+    private static void printLayout(FRLayout<String, String> layout) {
         System.out.println("------------ Layout ---------------");
         for (String vertex : layout.getGraph().getVertices()) {
             System.out.println(vertex + ": " + layout.transform(vertex));
