@@ -35,7 +35,7 @@ public class Main {
         printLayout(layout);
         while (!layout.done()) {
             try {
-                Thread.sleep(200);
+                Thread.sleep(00);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 throw new RuntimeException(e);
@@ -83,35 +83,12 @@ public class Main {
                 Pair<String> edges = layout.getGraph().getEndpoints(edge);
                 Point d1 = getVertexLocation(layout, edges.getFirst());
                 Point d2 = getVertexLocation(layout, edges.getSecond());
-                int diffX = d2.x - d1.x;
-                int diffY = d2.y - d1.y;
-                double propX;
-                double propY;
-                if (diffX != 0 && diffY != 0) {
-                    propX = (double) diffX / diffY;
-                    propY = (double) diffY / diffX;
-                } else if (diffX == 0 && diffY == 0) {
-                    propX = 0;
-                    propY = 0;
-                } else if (diffX == 0) {
-                    propX = 1;
-                    propY = 0;
-                } else {
-                    propX = 0;
-                    propY = 1;
-                }
-                double h = 30;
-                double dx = Math.max(h, h * propX);
-                double dy = Math.max(h, h * propY);
-
-                double sign = Math.random() > 0.5 ? 1 : -1;
-
-                double controlX = (d1.x + d2.x) / 2 + sign * dx;
-                double controlY = (d1.y + d2.y) / 2 + sign * dy;
-                QuadCurve2D.Double q = new QuadCurve2D.Double(d1.x, d1.y, controlX, controlY, d2.x,
-                        d2.y);
-                g.draw(q);
-                // g2.drawLine(d1.x, d1.y, d2.x, d2.y);
+                int h = 30;
+                Point cp = getControlPoint(d1.x, d1.y, d2.x, d2.y, h, true);
+                QuadCurve2D.Double q = new QuadCurve2D.Double(d1.x, d1.y, cp.x, cp.y, d2.x, d2.y);
+                // g.draw(q);
+                g.drawLine(d1.x, d1.y, cp.x, cp.y);
+                // g.drawLine(d1.x, d1.y, d2.x, d2.y);
             }
             for (String vertex : layout.getGraph().getVertices()) {
                 Point d = getVertexLocation(layout, vertex);
@@ -126,6 +103,16 @@ public class Main {
             }
         }
 
+    }
+
+    private static Point getControlPoint(int x1, int y1, int x2, int y2, int h, boolean positive) {
+        int sign = positive ? 1 : -1;
+        int x3 = (x1 + x2) / 2;
+        int y3 = (y1 + y2) / 2;
+        double d = Math.sqrt((y3 - y1) * (y3 - y1) + (x3 - x1) * (x3 - x1));
+        int x = (int) Math.round(y3 + sign * h * (x3 - x1) / d);
+        int y = (int) Math.round(x3 - sign * h * (y3 - y1) / d);
+        return new Point(x, y);
     }
 
     private static Point getVertexLocation(FRLayout<String, String> layout, String vertex) {
