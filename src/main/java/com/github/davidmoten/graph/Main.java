@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.QuadCurve2D;
 
@@ -43,12 +44,13 @@ public class Main {
             frame.setVisible(true);
             JPanel panel = new MyPanel(layout);
             frame.getContentPane().add(panel);
-
         });
 
     }
 
     private static class MyPanel extends JPanel {
+
+        private static final long serialVersionUID = -9085027052515908648L;
 
         private final FRLayout<String, String> layout;
 
@@ -96,7 +98,14 @@ public class Main {
             }
             for (String vertex : layout.getGraph().getVertices()) {
                 Point d = getVertexLocation(layout, vertex);
-                g2.drawString(vertex, d.x - g2.getFontMetrics().stringWidth(vertex) / 2, d.y);
+                int w = g2.getFontMetrics().stringWidth(vertex);
+                int margin = 20;
+                Rectangle box = new Rectangle(d.x - w / 2 - margin,
+                        d.y - g2.getFontMetrics().getAscent() - margin, w + 2 * margin,
+                        g2.getFontMetrics().getHeight() + 2 * margin);
+                g2.clearRect(box.x, box.y, box.width, box.height);
+                g2.drawRect(box.x, box.y, box.width, box.height);
+                g2.drawString(vertex, d.x - w / 2, d.y);
             }
         }
 
