@@ -1,5 +1,6 @@
 package com.github.davidmoten.graph;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -38,7 +39,9 @@ public class StateDiagram {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            layout.step();
+            synchronized (layout) {
+                layout.step();
+            }
         }
         AtomicReference<JPanel> panel = showGui(layout);
         SwingUtilities.invokeLater(() -> panel.get().repaint());
@@ -54,10 +57,10 @@ public class StateDiagram {
             frame.setSize(layout.getSize());
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setTitle("State Diagram");
-            frame.setVisible(true);
             JPanel panel = new MyPanel(layout);
             ref.set(panel);
-            frame.getContentPane().add(panel);
+            frame.getContentPane().add(panel, BorderLayout.CENTER);
+            frame.setVisible(true);
         });
         return ref;
 
@@ -75,9 +78,8 @@ public class StateDiagram {
 
         @Override
         protected void paintComponent(Graphics gOld) {
+            super.paintComponent(gOld);
             Graphics2D g = (Graphics2D) gOld;
-            super.paintComponent(g);
-            g.clearRect(0, 0, 1000, 1000);
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             for (String edge : layout.getGraph().getEdges().stream().limit(2000)
                     .collect(Collectors.toList())) {
@@ -85,6 +87,10 @@ public class StateDiagram {
                 Point d1 = getVertexLocation(layout, edges.getFirst());
                 Point d2 = getVertexLocation(layout, edges.getSecond());
                 int h = 30;
+                if (d1.x == d2.x && d1.y == d2.y) {
+                    d2.x += 5;
+                    d2.y += 5;
+                }
                 Point cp = getControlPoint(d1.x, d1.y, d2.x, d2.y, h, true);
                 QuadCurve2D.Double q = new QuadCurve2D.Double(d1.x, d1.y, cp.x, cp.y, d2.x, d2.y);
                 g.draw(q);
