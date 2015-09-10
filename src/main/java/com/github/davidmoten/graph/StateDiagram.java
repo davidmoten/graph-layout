@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.QuadCurve2D;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -30,20 +31,18 @@ public class StateDiagram {
         layout.initialize();
         layout.setSize(new Dimension(600, 600));
 
-        AtomicReference<JPanel> panel = showGui(layout);
-
-        printLayout(layout);
+        // printLayout(layout);
         while (!layout.done()) {
             try {
                 Thread.sleep(00);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 throw new RuntimeException(e);
             }
             layout.step();
-            SwingUtilities.invokeLater(() -> panel.get().repaint());
         }
-        printLayout(layout);
+        AtomicReference<JPanel> panel = showGui(layout);
+        SwingUtilities.invokeLater(() -> panel.get().repaint());
+        // printLayout(layout);
         System.out.println(g);
 
     }
@@ -80,7 +79,8 @@ public class StateDiagram {
             super.paintComponent(g);
             g.clearRect(0, 0, 1000, 1000);
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            for (String edge : layout.getGraph().getEdges()) {
+            for (String edge : layout.getGraph().getEdges().stream().limit(2000)
+                    .collect(Collectors.toList())) {
                 Pair<String> edges = layout.getGraph().getEndpoints(edge);
                 Point d1 = getVertexLocation(layout, edges.getFirst());
                 Point d2 = getVertexLocation(layout, edges.getSecond());
