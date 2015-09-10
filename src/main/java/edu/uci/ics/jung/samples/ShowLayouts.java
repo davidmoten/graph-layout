@@ -29,7 +29,7 @@ import javax.swing.JPanel;
 
 import org.apache.commons.collections15.Factory;
 
-import com.github.davidmoten.graph.Main;
+import com.github.davidmoten.graph.StateDiagram;
 
 import edu.uci.ics.jung.algorithms.generators.random.MixedRandomGraphGenerator;
 import edu.uci.ics.jung.algorithms.layout.CircleLayout;
@@ -163,7 +163,7 @@ public class ShowLayouts extends JApplet {
         g_array[4] = TestGraphs.getOneComponentGraph();
         g_array[5] = TestGraphs.createChainPlusIsolates(18, 5);
         g_array[6] = TestGraphs.createChainPlusIsolates(0, 20);
-        g_array[7] = Main.createTestGraph();
+        g_array[7] = StateDiagram.createTestGraph();
 
         @SuppressWarnings("unchecked")
         Graph<Integer, Number> g = (Graph<Integer, Number>) g_array[4]; // initial

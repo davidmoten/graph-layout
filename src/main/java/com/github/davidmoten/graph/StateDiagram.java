@@ -19,7 +19,7 @@ import edu.uci.ics.jung.graph.SparseMultigraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import edu.uci.ics.jung.graph.util.Pair;
 
-public class Main {
+public class StateDiagram {
 
     public static void main(String[] args) {
         // Graph<String, Number> g = TestGraphs.getOneComponentGraph();
@@ -78,6 +78,7 @@ public class Main {
         protected void paintComponent(Graphics gOld) {
             Graphics2D g = (Graphics2D) gOld;
             super.paintComponent(g);
+            g.clearRect(0, 0, 1000, 1000);
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             for (String edge : layout.getGraph().getEdges()) {
                 Pair<String> edges = layout.getGraph().getEndpoints(edge);
@@ -86,8 +87,8 @@ public class Main {
                 int h = 30;
                 Point cp = getControlPoint(d1.x, d1.y, d2.x, d2.y, h, true);
                 QuadCurve2D.Double q = new QuadCurve2D.Double(d1.x, d1.y, cp.x, cp.y, d2.x, d2.y);
-                // g.draw(q);
-                g.drawLine(d1.x, d1.y, cp.x, cp.y);
+                g.draw(q);
+                // g.drawLine(d1.x, d1.y, cp.x, cp.y);
                 // g.drawLine(d1.x, d1.y, d2.x, d2.y);
             }
             for (String vertex : layout.getGraph().getVertices()) {
@@ -105,13 +106,13 @@ public class Main {
 
     }
 
-    private static Point getControlPoint(int x1, int y1, int x2, int y2, int h, boolean positive) {
+    static Point getControlPoint(int x1, int y1, int x2, int y2, int h, boolean positive) {
         int sign = positive ? 1 : -1;
         int x3 = (x1 + x2) / 2;
         int y3 = (y1 + y2) / 2;
         double d = Math.sqrt((y3 - y1) * (y3 - y1) + (x3 - x1) * (x3 - x1));
-        int x = (int) Math.round(y3 + sign * h * (x3 - x1) / d);
-        int y = (int) Math.round(x3 - sign * h * (y3 - y1) / d);
+        int y = (int) Math.round(y3 + sign * h * (x3 - x1) / d);
+        int x = (int) Math.round(x3 - sign * h * (y3 - y1) / d);
         return new Point(x, y);
     }
 
