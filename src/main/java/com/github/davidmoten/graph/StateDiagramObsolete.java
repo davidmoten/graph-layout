@@ -46,9 +46,6 @@ public class StateDiagramObsolete {
         }
         AtomicReference<JPanel> panel = showGui(layout);
         SwingUtilities.invokeLater(() -> panel.get().repaint());
-        // printLayout(layout);
-        System.out.println(g);
-
     }
 
     private static AtomicReference<JPanel> showGui(FRLayout<String, String> layout) {
@@ -64,7 +61,6 @@ public class StateDiagramObsolete {
             frame.setVisible(true);
         });
         return ref;
-
     }
 
     private static class MyPanel extends JPanel {
@@ -149,10 +145,4 @@ public class StateDiagramObsolete {
         return g;
     }
 
-    private static void printLayout(FRLayout<String, String> layout) {
-        System.out.println("------------ Layout ---------------");
-        for (String vertex : layout.getGraph().getVertices()) {
-            System.out.println(vertex + ": " + layout.transform(vertex));
-        }
-    }
 }

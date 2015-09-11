@@ -26,13 +26,12 @@ import edu.uci.ics.jung.visualization.renderers.Renderer;
 public class StateDiagram {
     public static void main(String[] args) {
         Graph<String, String> g = createTestGraph();
-        FRLayout<String, String> layout = new FRLayout<String, String>(g, new Dimension(600, 600));
+        FRLayout<String, String> layout = new FRLayout<String, String>(g, new Dimension(800, 600));
         while (!layout.done())
             layout.step();
 
-        // layout.setSize(new Dimension(500, 500));
         VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout,
-                new Dimension(600, 600));
+                new Dimension(800, 600));
         PickedState<String> pickedState = vv.getPickedVertexState();
         vv.getRenderContext().setVertexLabelTransformer(s -> s);
         Transformer<String, Paint> seedFillVertex = new SeedFillColor<>(pickedState);
