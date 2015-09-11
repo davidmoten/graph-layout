@@ -8,6 +8,7 @@ import java.awt.Shape;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -25,7 +26,7 @@ import edu.uci.ics.jung.visualization.renderers.Renderer;
 public class StateDiagram {
     public static void main(String[] args) {
         Graph<String, String> g = createTestGraph();
-        FRLayout<String, String> layout = new FRLayout<String, String>(g);
+        FRLayout<String, String> layout = new FRLayout<String, String>(g, new Dimension(600, 600));
         while (!layout.done())
             layout.step();
 
@@ -33,30 +34,13 @@ public class StateDiagram {
         VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout,
                 new Dimension(600, 600));
         PickedState<String> pickedState = vv.getPickedVertexState();
-        {
-            Transformer<String, String> transformer = new Transformer<String, String>() {
-                @Override
-                public String transform(String vertex) {
-                    return vertex;
-                }
-            };
-            vv.getRenderContext().setVertexLabelTransformer(transformer);
-        }
+        vv.getRenderContext().setVertexLabelTransformer(s -> s);
         Transformer<String, Paint> seedFillVertex = new SeedFillColor<>(pickedState);
         Transformer<String, Paint> seedDrawVertex = new SeedDrawColor<>(pickedState);
         vv.getRenderContext().setVertexFillPaintTransformer(seedFillVertex);
         vv.getRenderContext().setVertexDrawPaintTransformer(seedDrawVertex);
-        {
-            Transformer<String, String> transformer = new Transformer<String, String>() {
-                @Override
-                public String transform(String arg0) {
-                    return arg0;
-                }
-            };
-            vv.getRenderContext().setEdgeLabelTransformer(transformer);
-        }
+        vv.getRenderContext().setEdgeLabelTransformer(s -> s.substring(0, s.length() - 1));
         vv.getRenderContext().setVertexShapeTransformer(createVertexShapeTransformer(layout));
-
         vv.getRenderer().getVertexLabelRenderer().setPosition(Renderer.VertexLabel.Position.CNTR);
 
         // The following code adds capability for mouse picking of
@@ -65,31 +49,29 @@ public class StateDiagram {
         vv.setGraphMouse(graphMouse);
         graphMouse.setMode(ModalGraphMouse.Mode.PICKING);
 
-        JFrame frame = new JFrame();
-        JPanel surround = new JPanel();
-        surround.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
-        surround.add(vv);
-        frame.getContentPane().add(surround);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.pack();
-        frame.setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame();
+            JPanel surround = new JPanel();
+            surround.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
+            surround.add(vv);
+            frame.getContentPane().add(surround);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setLocationRelativeTo(null);
+            frame.pack();
+            frame.setVisible(true);
+        });
     }
 
     private static Transformer<String, Shape> createVertexShapeTransformer(
             Layout<String, String> layout) {
-        return new Transformer<String, Shape>() {
-
-            @Override
-            public Shape transform(String vertex) {
-                int w = 100;
-                int margin = 5;
-                int ascent = 12;
-                int descent = 5;
-                Shape shape = new Rectangle(-w / 2 - margin, -ascent - margin, w + 2 * margin,
-                        (ascent + descent) + 2 * margin);
-                return shape;
-            }
+        return vertex -> {
+            int w = 100;
+            int margin = 5;
+            int ascent = 12;
+            int descent = 5;
+            Shape shape = new Rectangle(-w / 2 - margin, -ascent - margin, w + 2 * margin,
+                    (ascent + descent) + 2 * margin);
+            return shape;
         };
     }
 

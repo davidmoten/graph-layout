@@ -29,6 +29,6 @@ final class SeedFillColor<V> implements Transformer<V, Paint> {
 
     @Override
     public Paint transform(V v) {
-        return Color.YELLOW;
+        return Color.decode("#FFF1BC");
     }
 }
